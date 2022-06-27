@@ -3,27 +3,36 @@ import './styles.css'
 import { Card } from '../../components/Card'
 
 export function Home() {
-  const [cornoName, setCornoName] = useState('')
-  const [cornos, setCornos] = useState([])
-  const [age, setAge] = useState('')
   const [user, setUser] = useState({name: '', avatar: ''})
+  const [gitUsername, setGitUsername] = useState('')
+  const [gitProps, setGitProps] = useState([])
   const urlAPI = 'https://api.github.com/users/mad1scool'
   
-  function handleAddCorno () {
-    const newCorno = {
-      name: cornoName,
-      age: age,
-      time: new Date().toLocaleDateString('pt-br', {
-        hour: '2-digit',
-        minute:'2-digit',
-        second:'2-digit'
-      })
-    }
+  function handleGitProps() {
+    const gitUrl = `https://api.github.com/users/${gitUsername}`
 
-    setCornos(prevState => [...prevState, newCorno])
-
-    setCornoName('')
-    setAge('')
+    //fetching url api github
+    fetch(gitUrl)
+    .then(res => res.json())
+    .then(data => {
+      const newGitProps = {
+        name: data.name,
+        location: data.location,
+        avatar: data.avatar_url,
+        verification: data.message
+      }
+      
+      if (newGitProps.verification === "Not Found") {
+        alert("Perfil github inválido")
+        setGitUsername('')
+        return
+      } else {
+        setGitProps(prevState => [...prevState, newGitProps])
+        setGitUsername('')
+      }
+      
+    })
+    
   }
 
   useEffect(() => {
@@ -46,29 +55,21 @@ export function Home() {
           <img src={user.avatar} alt="profile picture" />
         </div>
       </header>
-      
+    
+      <input value={gitUsername} onChange={e=>setGitUsername(e.target.value)} type="text" placeholder='Insira o link do github do corno'/>
 
-      <input value={cornoName} onChange={e=>setCornoName(e.target.value)} type="text" placeholder='Insira o nome dos cornos'/>
-
-      <input type="number" value={age} placeholder='Insira idade do corno' onChange={e=>setAge(e.target.value)} />
-
-      <button type='button' onClick={cornoName === '' || age === '' ? {} : handleAddCorno}>Enviar</button>
+      <button type='button' onClick={gitUsername === '' ? {} : handleGitProps}>Enviar</button>
 
       {
-        cornos.map(corno => 
+        gitProps.map(props =>
           <Card
-            key={corno.time}
-            name={corno.name} 
-            time={corno.time}
-            age={corno.age} 
+            key={Math.random()}
+            name={props.name}
+            location={props.location} 
+            avatar={props.avatar}
           />
         )
-        
       }
-      
-
     </div>
-      
-    
   )
 }
